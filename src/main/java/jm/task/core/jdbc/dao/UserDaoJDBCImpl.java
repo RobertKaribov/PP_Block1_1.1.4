@@ -8,17 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
-    private static Connection connection;
+    private final Connection connection = Util.getConnection();
 
-    static {
-        try {
-            connection = Util.connect();
-        } catch (SQLException e) {
-            // Логирование ошибки
-            e.printStackTrace();
-        }
+    public UserDaoJDBCImpl() {
+
     }
-
     private static final String CREATE_TABLE_SQL = "CREATE TABLE IF NOT EXISTS users (" +
             "id BIGINT AUTO_INCREMENT PRIMARY KEY," +
             "name VARCHAR(50) NOT NULL," +
@@ -69,11 +63,7 @@ public class UserDaoJDBCImpl implements UserDao {
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, id);
             int rowsAffected = preparedStatement.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Пользователь с id " + id + " успешно удален из базы данных.");
-            } else {
-                System.out.println("Пользователь с id " + id + " не найден в базе данных.");
-            }
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             // Логирование ошибки
             System.out.println("Ошибка при удалении пользователя с id " + id + ":");
@@ -99,8 +89,7 @@ public class UserDaoJDBCImpl implements UserDao {
                 userList.add(user);
             }
         } catch (SQLException e) {
-            // Логирование ошибки
-            throw new RuntimeException("Error fetching users from the database", e);
+            e.printStackTrace();
         }
         return userList;
     }
